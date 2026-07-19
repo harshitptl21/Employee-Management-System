@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ems_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ems_user
+      POSTGRES_PASSWORD: ems_password
+      POSTGRES_DB: ems_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - ems_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ems_user -d ems_db']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: ems_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      CLIENT_ORIGIN: http://localhost:3000
+      DATABASE_URL: postgresql://ems_user:ems_password@postgres:5432/ems_db?schema=public
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change_this_access_secret_in_production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_this_refresh_secret_in_production}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      BCRYPT_SALT_ROUNDS: 12
+    ports:
+      - '5000:5000'
+    volumes:
+      - ems_uploads:/app/uploads
+    command: sh -c "npx prisma migrate deploy && node dist/server.js"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:5000/api
+    container_name: ems_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - '3000:3000'
+
+volumes:
+  ems_pgdata:
+  ems_uploads:
