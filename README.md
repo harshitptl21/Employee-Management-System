@@ -53,7 +53,7 @@ A production-style Employee Management System with secure authentication, role-b
   - ✅ Dark mode (persisted, system-preference aware)
   - ✅ Docker + Docker Compose (Postgres + backend + frontend)
   - ✅ Unit tests (Jest — password hashing, JWT, RBAC middleware, circular-reporting detection, validators)
-  - ✅ Cloud deployment — https://employee-management-system-vitf.onrender.com
+  - ✅ Cloud deployment — https://employee-management-system-dha0.onrender.com
 
 ---
 
