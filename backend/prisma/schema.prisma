@@ -1,0 +1,73 @@
+// Employee Management System - Prisma Schema
+// Database: PostgreSQL
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  HR_MANAGER
+  EMPLOYEE
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Employee {
+  id              String         @id @default(uuid())
+  employeeCode    String         @unique // Human-readable Employee ID, e.g. EMP-0001
+  name            String
+  email           String         @unique
+  password        String // bcrypt hashed
+  phone           String?
+  department      String?
+  designation     String?
+  salary          Decimal?       @db.Decimal(12, 2)
+  joiningDate     DateTime?
+  status          EmployeeStatus @default(ACTIVE)
+  role            Role           @default(EMPLOYEE)
+  profileImageUrl String?
+
+  // Organizational hierarchy (self-relation)
+  managerId String?
+  manager   Employee?  @relation("ReportingLine", fields: [managerId], references: [id])
+  reports   Employee[] @relation("ReportingLine")
+
+  // Soft delete
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  refreshTokens RefreshToken[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([department])
+  @@index([status])
+  @@index([role])
+  @@index([managerId])
+  @@map("employees")
+}
+
+// Stores hashed refresh tokens for revocation / logout support
+model RefreshToken {
+  id         String   @id @default(uuid())
+  tokenHash  String   @unique
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  revoked    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([employeeId])
+  @@map("refresh_tokens")
+}
