@@ -1,0 +1,6 @@
+name,email,phone,department,designation,salary,joiningDate,status
+Alicia Fernandez,alicia.fernandez@example.com,+15550101,Engineering,Frontend Engineer,92000,2024-03-11,ACTIVE
+Ben Carter,ben.carter@example.com,+15550102,Sales,Account Executive,78000,2023-11-04,ACTIVE
+Chidi Okonkwo,chidi.okonkwo@example.com,+15550103,Engineering,Backend Engineer,98000,2024-06-18,ACTIVE
+Diya Patel,diya.patel@example.com,+15550104,Marketing,Content Strategist,71000,2022-09-01,INACTIVE
+Ethan Brooks,ethan.brooks@example.com,+15550105,Finance,Financial Analyst,84000,2023-02-27,ACTIVE
